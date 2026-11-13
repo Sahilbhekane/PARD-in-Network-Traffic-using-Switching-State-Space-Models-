@@ -361,7 +361,7 @@ python tests/test_data_processing.py
 |------|-----|--------------|
 | **Prakul Sunil Hiremath** | 2VX23CS013 | Lead — Inference engines & core models |
 | **Peerahamad Bagawan** | 2VX23CS029 | Data processing & evaluation pipeline |
-| **Sahil Bekane** | 2VX23CS042 | Experiments, testing & benchmarking |
+| **Sahil Bhekane** | 2VX23CS042 | Experiments, testing & benchmarking |
 | **Hemanth B. K.** | 2VX23CS012 | Visualization & documentation |
 | **Dr. Rashmi R. Rachh (Guide)** | — | Project supervision & guidance |
 
