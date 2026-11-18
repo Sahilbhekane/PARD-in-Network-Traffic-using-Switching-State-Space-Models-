@@ -1,23 +1,20 @@
 <div align="center">
 
-<img src="assets/banner.svg" alt="PARD-SSM: Probabilistic Attack Regime Detection in Network Traffic" width="100%"/>
+# PARD-SSM: Reproduction, Evaluation & Interactive Explorer
 
-<br/>
+**Probabilistic Attack Regime Detection in Network Traffic Using Switching State-Space Models**
 
-![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)
-![scikit-learn](https://img.shields.io/badge/ML-scikit--learn-F7931E?style=flat-square&logo=scikitlearn&logoColor=white)
-[![License](https://img.shields.io/badge/License-Apache_2.0-4CAF50?style=flat-square)](LICENSE)
 [![Live Demo](https://img.shields.io/badge/Live_Demo-PARD--SSM_Explorer-5479D5?style=flat-square&logo=vercel&logoColor=white)](https://pard-ssm-probabilistic-attack-regim.vercel.app/)
-[![arXiv](https://img.shields.io/badge/arXiv-2604.02299-B31B1B?style=flat-square&logo=arxiv&logoColor=white)](https://arxiv.org/abs/2604.02299)
+![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white)
+![React](https://img.shields.io/badge/Frontend-React_+_TypeScript-61DAFB?style=flat-square&logo=react&logoColor=black)
+![License](https://img.shields.io/badge/License-Apache_2.0-4CAF50?style=flat-square)
+[![arXiv](https://img.shields.io/badge/arXiv-2604.02299-B31B1B?style=flat-square)](https://arxiv.org/abs/2604.02299)
 [![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.19697928-0A66C2?style=flat-square)](https://doi.org/10.5281/zenodo.19697928)
 
-**A time-ordered, leakage-free reproduction and re-evaluation of PARD-SSM, a switching state-space approach to network intrusion detection, on CICIDS2017 and UNSW-NB15.**
+An independent reproduction, time-ordered re-evaluation and interactive web platform for PARD-SSM, evaluated on **CICIDS2017** and **UNSW-NB15**.
 
-[**Live demo**](https://pard-ssm-probabilistic-attack-regim.vercel.app/) ·
-[**Results**](#results) ·
-[**Quick start**](#quick-start) ·
-[**Final report (PDF)**](docs/Final_Report.pdf) ·
-[**Citation**](#citation)
+**[Open the live Explorer →](https://pard-ssm-probabilistic-attack-regim.vercel.app/)**
 
 </div>
 
@@ -25,46 +22,230 @@
 
 ## Highlights
 
-- **Switching state-space + Random Forest pipeline.** A two-regime Kalman-filter bank infers latent traffic regimes; a Random Forest combines the regime posteriors with selected flow features and their temporal differences.
-- **Chronological evaluation.** Train / validation / test splits follow capture order (60 / 20 / 20, with a 20-row embargo). Feature selection and scaling are fitted on training data only, and the decision threshold is chosen on validation data only.
-- **Honest ablation.** Each component is measured separately: Random Forest only, plus temporal differences, plus SSSM regime posteriors, and the regime posterior on its own.
-- **Reproducible and deployable.** The pipeline, exported models, FastAPI backend and public web app, **PARD-SSM Explorer**, live in the [team repository](https://github.com/PeerAhammad/PARD-SSM-Probabilistic-Attack-Regime-Detection); this repository holds the original research implementation, the project report and the documentation.
-- **Negative results are reported as such.** Under chronological evaluation the SSSM regime features carry signal but do **not** improve on a Random Forest alone.
+- **PARD-SSM Explorer** is a public research platform with real model inference. It lets you run the trained pipelines on a demo sample or your own CSV, inspect the inferred regimes, and compare reported and reproduced results.
+- **Two separate, validated pipelines**, one for CICIDS2017 and one for UNSW-NB15. Each has its own feature schema, preprocessing, regime filter, Random Forest and decision threshold. Exported artifacts are reloaded and checked to reproduce the held-out predictions exactly.
+- **A time-ordered, leakage-free re-evaluation** that is kept strictly separate from the original repository-reported results.
+- **Transparent findings.** In the new evaluation the SSSM regime features carry signal on their own but do not improve on a Random Forest alone. See [Section 5](#5-results).
 
-> [!IMPORTANT]
-> This is an offline research reproduction on benchmark data from 2015 and 2017. It is **not** a production security tool, and it makes **no early-detection claim**.
-
-## Results
-
-All numbers below come from the **held-out test partition** of the chronological protocol (single seed, threshold selected on validation). They come from the exported [`metrics.json`](https://github.com/PeerAhammad/PARD-SSM-Probabilistic-Attack-Regime-Detection/tree/main/artifacts) files in the team repository.
+**Newly reproduced held-out results** (chronological train / validation / test split, threshold chosen on validation, single seed):
 
 | Held-out test | CICIDS2017 | UNSW-NB15 |
 | :-- | --: | --: |
 | Random Forest only, F1 | **0.924** | 0.834 |
 | Hybrid (RF + SSSM), F1 | 0.873 | **0.836** |
-| Hybrid, precision / recall | 0.974 / 0.792 | 0.724 / 0.989 |
-| Hybrid, ROC-AUC | **0.993** | 0.993 |
-| Hybrid, PR-AUC | 0.940 | 0.874 |
+| Random Forest only, ROC-AUC | 0.989 | **0.995** |
+| Hybrid (RF + SSSM), ROC-AUC | **0.993** | 0.993 |
 | SSSM regime posterior alone, ROC-AUC | 0.804 | 0.915 |
-| Decision threshold (max F1 on validation) | 0.654 | 0.269 |
 
-**What this shows**
+**Original repository-reported results** (random 80/20 split of 50,000 sampled rows stored in shuffled order; not reproduced here, see [Section 5.2](#52-original-repository-reported-experiments)):
 
-1. The regime posterior is informative on its own (ROC-AUC 0.804 / 0.915), but that information is **largely redundant** with the flow features the Random Forest already uses.
-2. On CICIDS2017 the Random Forest alone is **0.050 F1 ahead** of the hybrid; on UNSW-NB15 the two are tied within noise.
-3. Detection is uneven across attack classes: DDoS is caught almost always, DoS GoldenEye only about 40% of the time, and none of the 7 Bot rows is detected.
-4. Evaluation protocol matters: the original shuffled-split experiments reported F1 of 0.961 / 0.944, far above the chronological results.
+| | CICIDS2017 | UNSW-NB15 |
+| :-- | --: | --: |
+| Hybrid SSSM + RF, F1 | 0.9607 | 0.9438 |
+| Hybrid SSSM + RF, ROC-AUC | 0.9981 | 0.9996 |
 
-<p align="center">
-  <img src="docs/figures/protocol_effect.png" alt="F1 under shuffled versus chronological evaluation" width="62%"/>
-</p>
+> [!IMPORTANT]
+> The two tables use different data preparation and are **not comparable**. The original sampling stored rows in shuffled order, so sequence-based metrics such as detection lead time do not reflect real temporal detection. This repository makes no early-detection claim.
 
-<details>
-<summary><b>Ablation on the held-out test partition</b> (click to expand)</summary>
 
-<br/>
+## Quick Start
 
-**CICIDS2017**: 10,620 test rows, 5.3% attacks (about 560 attack rows)
+**Use the hosted Explorer:** open <https://pard-ssm-probabilistic-attack-regim.vercel.app/>. The backend runs on a free Render instance that sleeps when idle, so the first request after a quiet period can take up to a minute. If the backend is unreachable, the site shows clearly labelled *Precomputed Model Results — Not Live Inference*.
+
+**Run it locally** (trained artifacts are committed, so no retraining is needed):
+
+```bash
+git clone https://github.com/PeerAhammad/PARD-SSM-Probabilistic-Attack-Regime-Detection.git
+cd PARD-SSM-Probabilistic-Attack-Regime-Detection
+python -m venv .venv
+source .venv/bin/activate          # Windows (PowerShell): .venv\Scripts\Activate.ps1
+
+# Backend (terminal 1, from the repository root)
+pip install -r backend/requirements.txt
+uvicorn backend.app.main:app --port 8000
+
+# Frontend (terminal 2)
+cd frontend
+npm install
+npm run dev                        # http://localhost:5173
+```
+
+---
+
+## Table of Contents
+
+1. [Overview](#1-overview)
+2. [PARD-SSM Explorer](#2-pard-ssm-explorer)
+3. [Methodology](#3-methodology)
+4. [Datasets and Experimental Protocol](#4-datasets-and-experimental-protocol)
+5. [Results](#5-results)
+6. [Repository Structure](#6-repository-structure)
+7. [Installation and Usage](#7-installation-and-usage)
+8. [Deployment](#8-deployment)
+9. [Limitations](#9-limitations)
+10. [Citation and Attribution](#10-citation-and-attribution)
+11. [License](#11-license)
+
+---
+
+## 1. Overview
+
+PARD-SSM models network traffic as a latent dynamical system. Rather than classifying each flow in isolation, a **Switching State-Space Model (SSSM)** tracks hidden states and changing regimes over a sequence of observations. The regime posteriors are then combined with flow features in a Random Forest classifier.
+
+This repository contains:
+
+- the original research implementation (`src/`, `experiments/`) with baseline comparisons (HMM, Isolation Forest, LSTM), ablations and significance tests;
+- an **order-preserving data pipeline and train/export procedure** with a chronological split (`src/data_processing/loaders_v2.py`, `src/pipeline/`, `scripts/`);
+- exported, independently loadable **model artifacts** for both datasets (`artifacts/`);
+- a stateless **FastAPI inference service** (`backend/`);
+- the **PARD-SSM Explorer** web application (`frontend/`).
+
+> [!NOTE]
+> This is a reproduction and extension, not a claim of exact replication of every result or preprocessing decision in the original paper.
+
+## 2. PARD-SSM Explorer
+
+**Live site:** <https://pard-ssm-probabilistic-attack-regim.vercel.app/>
+
+The Explorer is designed as an academic showcase and a lightweight analytics dashboard. It never fabricates predictions: every probability, regime and metric comes from the exported models, or from a clearly labelled precomputed run of the same models.
+
+| Page | What it provides |
+| :-- | :-- |
+| **Overview** | Project summary, headline results (new held-out and repository-reported, shown separately), datasets, architecture |
+| **Live Demo** | Dataset selector, preloaded demo sample, CSV upload with column validation, prediction table with CSV download, probability distribution, confusion matrix and metrics when labels are present |
+| **Regime Explorer** | Attack probability timeline, regime posterior, latent-state magnitude, state uncertainty, regime transition counts and per-regime summary, using neutral labels (Regime 1 / Regime 2) |
+| **Results** | Repository-reported results, then the newly reproduced held-out evaluation: ablation, ROC and precision-recall curves from real predictions, confusion matrix, per-class flag rates |
+| **Methodology and Limitations** | Equations, pipeline, limitations, reproduction commands, citation and licence |
+
+**Design principles**
+
+- Regimes are **neutral filter states**, not attack families. They are not named after attacks because they were not learned or validated against attack categories.
+- An attack probability is a model output, not a verified classification.
+- Evaluation metrics appear only when ground-truth labels are supplied.
+- Each dataset has its own model. A CICIDS2017 model never scores UNSW-NB15 traffic, or the reverse.
+- The interface is light-themed with text and chart colours chosen to meet WCAG AA contrast ratios.
+
+### API
+
+The backend is stateless: nothing is stored between requests.
+
+| Endpoint | Purpose |
+| :-- | :-- |
+| `GET /api/health` | Backend status and per-dataset model availability |
+| `GET /api/demo` | Datasets, feature schemas, thresholds, reported metrics and regime definitions |
+| `POST /api/predict` | Validates input, runs the dataset-specific pipeline, returns predictions, probabilities, regime timelines and (with labels) evaluation metrics |
+
+`POST /api/predict` is `multipart/form-data` with `dataset` (`cicids2017` or `unswnb15`) and either `use_demo=true` or a CSV `file`:
+
+```bash
+# Demo sample
+curl -X POST https://pard-ssm-api-7hs9.onrender.com/api/predict \
+     -F dataset=cicids2017 -F use_demo=true
+
+# Your own CSV
+curl -X POST https://pard-ssm-api-7hs9.onrender.com/api/predict \
+     -F dataset=unswnb15 -F file=@my_traffic.csv
+```
+
+**Input requirements**
+
+- A header row containing the dataset's exact feature columns (leading and trailing spaces are ignored; extra columns are ignored). The required columns are listed in `artifacts/<dataset>/feature_schema.json` and in the Live Demo page.
+- All values numeric, finite and non-missing. Incompatible files are rejected with an explanatory error; rows are never dropped silently, because order matters.
+- Rows in capture order: the regime filter reads the file as one sequence and starts from a fresh state at the first row.
+- An optional `Label` column (0/1, or text where `BENIGN`/`Normal` means benign) enables evaluation metrics.
+- At most 5,000 rows and 10 MB per request. The data contains no flow identifier, so the row index is used.
+
+## 3. Methodology
+
+### 3.1 Mathematical formulation
+
+Continuous hidden-state dynamics are conditioned on a discrete regime $s_t$:
+
+$$
+x_t = A_{s_t}\, x_{t-1} + w_t \qquad \text{(state dynamics)}
+$$
+
+$$
+y_t = C_{s_t}\, x_t + v_t \qquad \text{(observation model)}
+$$
+
+| Symbol | Meaning |
+| :-- | :-- |
+| $x_t$ | Hidden system state |
+| $y_t$ | Observed (standardised) network features |
+| $s_t$ | Discrete regime |
+| $A_{s_t}$ | Regime-specific transition dynamics |
+| $C_{s_t}$ | Observation matrix |
+| $w_t,\ v_t$ | Process and observation noise |
+
+Regime transitions follow a Markov transition matrix.
+
+### 3.2 Hybrid pipeline
+
+```mermaid
+flowchart TD
+    A["Network flows (CSV)<br/>in capture order"] --> B["SelectKBest (k = 20)<br/>+ standardisation<br/>(fitted on training data only)"]
+    A --> C["Top-8 ranked features,<br/>standardised"]
+    C --> D["Two-regime Kalman bank<br/>(hand-set dynamics)"]
+    D --> E["Regime posterior<br/>causal smoothing, alpha = 0.7"]
+    B --> F["Hybrid features:<br/>20 features + 20 first differences<br/>+ 2 regime posteriors"]
+    E --> F
+    F --> G["Random Forest<br/>(class-balanced)"]
+    G --> H["Attack probability"]
+    H --> I["Threshold<br/>(selected on validation data)"]
+    I --> J["Benign / attack prediction"]
+```
+
+**Implementation details** (`src/pipeline/hybrid.py`)
+
+| Component | Configuration |
+| :-- | :-- |
+| Feature selection | `SelectKBest(f_classif, k=20)`, fitted on training data |
+| Regime filter input | 8 highest-scoring features, standardised |
+| Regime 1 | $A = 0.95\,I$, $Q = 0.001\,I$ (near-stationary, low noise) |
+| Regime 2 | $A = 1.5\,I$, $Q = 0.5\,I$ (high-gain, high noise) |
+| Observation model | $C = I$, $R = 0.2\,I$; regime stay probabilities 0.90 and 0.85 |
+| Smoothing | Causal exponential smoothing, $\alpha = 0.7$ |
+| Classifier | Random Forest, 100 trees, depth 20, class-balanced; minority class oversampled to parity on training data only |
+| Threshold | Probability maximising F1 on the validation split |
+
+The Kalman filter parameters and the transition matrix are **set by hand, not learned**. The regime filter starts from a fresh state at the first row of every sequence, both in evaluation and at inference.
+
+### 3.3 Two distinct tasks
+
+1. **Regime inference:** what the SSSM infers about latent network behaviour.
+2. **Attack detection:** how well the hybrid pipeline separates malicious from benign traffic.
+
+Standalone regime-based scores must not be confused with hybrid detection performance.
+
+## 4. Datasets and Experimental Protocol
+
+| Dataset | Ordering used | Features | Rows after preparation | Attack share |
+| :-- | :-- | --: | --: | --: |
+| CICIDS2017 | File order within each daily capture file (no timestamp column) | 52 | 53,884 | 21.0% (train) / 14.3% (val) / 5.3% (test) |
+| UNSW-NB15 | Sorted by the dataset's start-time field (`Stime`) | 38 | 42,898 | 2.0% (train) / 7.0% (val) / 6.2% (test) |
+
+**Protocol for the new evaluation** (`src/data_processing/loaders_v2.py`, `scripts/export_artifacts.py`):
+
+1. Load the raw files in capture order. Order is never shuffled.
+2. Binary target: any non-benign label is an attack.
+3. Remove incomplete or non-finite rows and exact duplicates within each file.
+4. Systematically sample every 47th row of the ordered stream, which preserves order.
+5. Split **chronologically 60 / 20 / 20** (train / validation / test) inside every CICIDS2017 daily file, and over the whole `Stime`-sorted UNSW-NB15 stream, with a 20-row embargo between splits.
+6. Fit feature selection and standardisation on training data only, select the threshold on validation data only, and evaluate once on the held-out test partition.
+7. Train three variants: Random Forest only, RF with temporal differences, and the full hybrid.
+
+Results are deterministic for the same raw files and library versions (`random_state = 42`).
+
+**Raw data layout.** CICIDS2017 daily CSV files (the `MachineLearningCVE` files) anywhere under `data/raw/`, and `UNSW-NB15_1.csv` to `UNSW-NB15_4.csv` (headerless, as distributed) under `data/raw/`. See [`docs/dataset_guide.md`](docs/dataset_guide.md).
+
+## 5. Results
+
+### 5.1 Newly reproduced held-out evaluation
+
+All numbers come from the held-out test partition. Each variant uses its own validation-selected threshold. The full hybrid's thresholds are 0.654 (CICIDS2017) and 0.269 (UNSW-NB15). The same metrics are available interactively on the Explorer's Results page, including ROC and precision-recall curves.
+
+**CICIDS2017** (10,620 test rows, 5.3% attacks, about 560 attack rows)
 
 | Variant | Precision | Recall | F1 | FPR | ROC-AUC | PR-AUC |
 | :-- | --: | --: | --: | --: | --: | --: |
@@ -72,7 +253,7 @@ All numbers below come from the **held-out test partition** of the chronological
 | RF + temporal differences | 0.945 | 0.819 | 0.877 | 0.003 | 0.991 | 0.936 |
 | Hybrid: RF + differences + SSSM posteriors | **0.974** | 0.792 | 0.873 | 0.001 | **0.993** | 0.940 |
 
-**UNSW-NB15**: 8,560 test rows, 6.2% attacks
+**UNSW-NB15** (8,560 test rows, 6.2% attacks)
 
 | Variant | Precision | Recall | F1 | FPR | ROC-AUC | PR-AUC |
 | :-- | --: | --: | --: | --: | --: | --: |
@@ -80,299 +261,230 @@ All numbers below come from the **held-out test partition** of the chronological
 | RF + temporal differences | 0.720 | **0.992** | 0.835 | 0.026 | 0.993 | 0.874 |
 | Hybrid: RF + differences + SSSM posteriors | 0.724 | 0.989 | **0.836** | 0.025 | 0.993 | 0.874 |
 
-<img src="docs/figures/ablation_heldout.png" alt="Ablation on both datasets" width="100%"/>
+The regime posterior used alone reaches a test ROC-AUC of **0.804** on CICIDS2017 and **0.915** on UNSW-NB15.
 
-With one seed and one split, differences of a few hundredths are within noise (see [`experiments/statistical_significance.py`](https://github.com/PeerAhammad/PARD-SSM-Probabilistic-Attack-Regime-Detection/blob/main/experiments/statistical_significance.py)).
+**Findings**
 
-</details>
+- The SSSM regime posterior carries real signal on its own, but it is largely redundant with the flow features. **No SSSM advantage in attack detection is demonstrated.**
+- On CICIDS2017, the Random Forest alone has the highest F1 and recall. The hybrid has a slightly higher ROC-AUC but lower recall at the chosen threshold.
+- On UNSW-NB15, the three variants are within 0.002 F1 of each other.
+- These are single-seed results on small test sets. Differences of a few hundredths should be treated as noise.
+- Early-detection performance is **not claimed**: no validated temporal early-detection experiment supports it.
 
-<details>
-<summary><b>Class-wise detection and confusion matrices</b> (click to expand)</summary>
-
-<br/>
-
-<img src="docs/figures/classwise_detection.png" alt="Class-wise detection rates" width="100%"/>
-
-The CICIDS2017 test partition contains only 17 SSH-Patator and 7 Bot rows, so those rates are statistically unreliable. On UNSW-NB15 most families have fewer than 30 test rows.
-
-<img src="docs/figures/confusion_matrices.png" alt="Confusion matrices of the hybrid model" width="85%"/>
-
-<img src="docs/figures/hybrid_roc_pr.png" alt="ROC and precision-recall curves, CICIDS2017" width="85%"/>
-
-*ROC (AUC 0.993) and precision-recall (AP 0.940) curves of the hybrid model on CICIDS2017.*
-
-</details>
-
-<details>
-<summary><b>Original repository-reported results (not reproduced)</b> (click to expand)</summary>
-
-<br/>
+### 5.2 Original repository-reported experiments
 
 > [!WARNING]
-> These come from the earlier research code, which randomly sampled 50,000 rows **before** an 80/20 split and stored them in shuffled order. A diagnostic confirmed that a flow's label is no more likely to match its predecessor's than chance, so sequence-based metrics, including **detection lead time**, are not temporally meaningful. The processed arrays also cannot be regenerated by the current loader. They are kept for transparency only and are **not comparable** to the table above.
+> These experiments are preserved for transparency, not as evidence of chronological detection performance. The processed arrays were built by randomly sampling 50,000 rows **before** the 80/20 split, and the rows are stored in shuffled order. A diagnostic confirmed it: the probability that a flow is an attack given that the previous one was is about the base rate (0.202 vs 0.197 on CICIDS2017, 0.027 vs 0.021 on UNSW-NB15). Metrics that depend on sequence order, including **detection lead time**, are therefore not temporally meaningful. The arrays also could not be regenerated from the raw files by the legacy loader (see [Limitations](#9-limitations)).
 
-| Metric (hybrid, threshold 0.5) | CICIDS2017 | UNSW-NB15 |
+**Hybrid SSSM + RF**, decision threshold 0.5:
+
+| Metric | CICIDS2017 | UNSW-NB15 |
 | :-- | --: | --: |
 | Accuracy | 98.41% | 99.75% |
-| Attack precision | 93.95% | 90.13% |
-| Attack recall | 98.28% | 99.06% |
-| F1-score | 0.9607 | 0.9438 |
+| Attack Precision | 93.95% | 90.13% |
+| Attack Recall | 98.28% | 99.06% |
+| F1-Score | 0.9607 | 0.9438 |
 | ROC-AUC | 0.9981 | 0.9996 |
 | PR-AUC | 0.9937 | 0.9823 |
+| Detection lead time (sequence steps, **not valid**, see above) | 28.32 ± 14.26 | 31.24 ± 13.52 |
 
-**Baselines** (original configuration, shuffled split, 10-epoch LSTM; not re-run chronologically)
+Standalone Switching SSM regime classification accuracy was 79.81% (CICIDS2017) and 95.23% (UNSW-NB15). This measures regime inference, not attack detection.
 
-| Method | CICIDS2017 F1 | CICIDS2017 ROC-AUC | UNSW-NB15 F1 | UNSW-NB15 ROC-AUC |
-| :-- | --: | --: | --: | --: |
-| HMM | 0.0719 | 0.4947 | 0.0314 | 0.5008 |
-| Isolation Forest | 0.4446 | 0.7041 | 0.3004 | 0.9723 |
-| LSTM | 0.3273 | 0.5058 | 0.0413 | 0.4975 |
-| Switching SSM + RF | 0.9604 | 0.9982 | 0.9438 | 0.9996 |
+**Baseline comparison** (original configuration, 10-epoch LSTM; best per column in **bold**)
 
-The hybrid includes a supervised Random Forest while the baselines are fixed-configuration conventional models, so this gap should **not** be attributed to the switching SSM. Figures: [`results/baselines_cicids2017.png`](https://github.com/PeerAhammad/PARD-SSM-Probabilistic-Attack-Regime-Detection/blob/main/results/baselines_cicids2017.png), [`results/baselines_unswnb15.png`](https://github.com/PeerAhammad/PARD-SSM-Probabilistic-Attack-Regime-Detection/blob/main/results/baselines_unswnb15.png), [`results/ablation_cicids2017.png`](https://github.com/PeerAhammad/PARD-SSM-Probabilistic-Attack-Regime-Detection/blob/main/results/ablation_cicids2017.png).
+*CICIDS2017*
 
-</details>
+| Method | Precision | Recall | F1-Score | ROC-AUC | PR-AUC |
+| :-- | --: | --: | --: | --: | --: |
+| HMM | 0.1780 | 0.0451 | 0.0719 | 0.4947 | 0.1946 |
+| Isolation Forest | 0.7444 | 0.3170 | 0.4446 | 0.7041 | 0.4786 |
+| LSTM | 0.1977 | 0.9504 | 0.3273 | 0.5058 | 0.2010 |
+| **Switching SSM + RF** | **0.9390** | **0.9828** | **0.9604** | **0.9982** | **0.9936** |
 
-## PARD-SSM Explorer
+<p align="center"><img src="results/baselines_cicids2017.png" alt="CICIDS2017 baseline comparison" width="85%"></p>
 
-A research web app with **real model inference** (no simulated predictions): run the trained pipelines on a demo sample or your own CSV, inspect the inferred regimes, and browse the results.
+*UNSW-NB15*
 
-**[Open the live Explorer →](https://pard-ssm-probabilistic-attack-regim.vercel.app/)**
+| Method | Precision | Recall | F1-Score | ROC-AUC | PR-AUC |
+| :-- | --: | --: | --: | --: | --: |
+| HMM | 0.0190 | 0.0896 | 0.0314 | 0.5008 | 0.0210 |
+| Isolation Forest | 0.2756 | 0.3302 | 0.3004 | 0.9723 | 0.2775 |
+| LSTM | 0.0214 | 0.5425 | 0.0413 | 0.4975 | 0.0208 |
+| **Switching SSM + RF** | **0.9013** | **0.9906** | **0.9438** | **0.9996** | **0.9826** |
 
-<table>
-  <tr>
-    <td width="50%"><img src="docs/figures/explorer/overview.png" alt="Explorer overview page"/></td>
-    <td width="50%"><img src="docs/figures/explorer/live_demo.png" alt="Explorer live demo page"/></td>
-  </tr>
-  <tr>
-    <td align="center"><sub>Overview: problem, approach, headline held-out results</sub></td>
-    <td align="center"><sub>Live Demo: demo sample or CSV upload, per-row attack probability</sub></td>
-  </tr>
-  <tr>
-    <td width="50%"><img src="docs/figures/explorer/regime_explorer.png" alt="Regime explorer page"/></td>
-    <td width="50%"><img src="docs/figures/explorer/methodology.png" alt="Methodology page"/></td>
-  </tr>
-  <tr>
-    <td align="center"><sub>Regime Explorer: regimes are neutral filter states, not attack families</sub></td>
-    <td align="center"><sub>Methodology &amp; Limitations: model, pipeline, caveats</sub></td>
-  </tr>
-</table>
+<p align="center"><img src="results/baselines_unswnb15.png" alt="UNSW-NB15 baseline comparison" width="85%"></p>
 
-> The Explorer's front end and inference API are maintained in the team repository, [PeerAhammad/PARD-SSM-Probabilistic-Attack-Regime-Detection](https://github.com/PeerAhammad/PARD-SSM-Probabilistic-Attack-Regime-Detection). The hosted backend runs on a free-tier instance that sleeps when idle, so the first request after a quiet period can take up to a minute.
+The baselines were **not** re-run under the chronological protocol of Section 5.1. The UNSW-NB15 HMM run produced a likelihood non-convergence warning, and the LSTM results depend on the 10-epoch configuration.
 
-## How it works
+**Original ablation** (lead time omitted for the reason above)
 
-PARD-SSM treats network traffic as a latent dynamical system whose behaviour switches between discrete regimes, instead of classifying every flow in isolation.
-
-```mermaid
-flowchart TD
-    A["Network flows (CSV)<br/>CICIDS2017 / UNSW-NB15<br/>in capture order"] --> B["SelectKBest (ANOVA F, k = 20)<br/>+ standardisation<br/>fitted on training data only"]
-    B --> C["Top-8 ranked features"]
-    B --> D["20 selected features<br/>+ 20 first differences"]
-    C --> E["Two-regime Kalman-filter bank<br/>hand-set dynamics"]
-    E --> F["Regime posteriors<br/>causal smoothing, alpha = 0.7"]
-    D --> G["Hybrid feature vector (42)<br/>20 + 20 + 2 regime posteriors"]
-    F --> G
-    G --> H["Random Forest<br/>100 trees, depth 20, class-balanced<br/>minority class oversampled"]
-    H --> I["Threshold<br/>max F1 on validation split"]
-    I --> J["Attack probability,<br/>predicted class and regime"]
-```
-
-**Model.** A discrete regime $s_t$ follows a first-order Markov chain with transition matrix $\Pi$ and selects the dynamics of a continuous hidden state $x_t$:
-
-$$
-x_t = A_{s_t}\, x_{t-1} + w_t, \qquad y_t = C_{s_t}\, x_t + v_t, \qquad \Pi_{ij} = P(s_t = j \mid s_{t-1} = i)
-$$
-
-| Component | Configuration in the reproduced pipeline |
-| :-- | :-- |
-| Regime 1 | $A = 0.95\,I$, $Q = 0.001\,I$ (near-stationary, low noise) |
-| Regime 2 | $A = 1.5\,I$, $Q = 0.5\,I$ (high gain, high noise) |
-| Observation model | $C = I$, $R = 0.2\,I$ (both regimes) |
-| Regime transitions | Fixed stay probabilities 0.90 and 0.85 |
-| Posterior smoothing | Causal exponential smoothing, $\alpha = 0.7$ |
-| Parameter learning | **None.** All values are hand-set |
-| Classifier | Random Forest, 100 trees, max depth 20, class-balanced |
-
-> [!NOTE]
-> The two regimes of the reproduced pipeline are **neutral filter states**, not validated attack families. The repository also keeps the original research implementation (Kalman, EKF, UKF and a switching Kalman filter with GPB2, Viterbi decoding and EM learning, in [`src/inference/`](src/inference)). The reproduced evaluation does not use those learned-parameter models.
-
-Full derivations (KF → RTS smoother → GPB2 → Viterbi) are in [`docs/math_derivations.md`](docs/math_derivations.md). The dependency structure is shown in [`docs/figures/graphical_model.png`](docs/figures/graphical_model.png).
-
-## Evaluation protocol
-
-| Dataset | Ordering | Features | Partition rows (train / val / test) | Attack share (train / val / test) |
-| :-- | :-- | --: | :-- | :-- |
-| CICIDS2017 | File order within each daily CSV (no timestamp column) | 52 | 32,327 / 10,617 / 10,620 | 21.0% / 14.3% / 5.3% |
-| UNSW-NB15 | Sorted by start time (`Stime`) | 38 | 25,738 / 8,560 / 8,560 | 2.0% / 7.0% / 6.2% |
-
-1. Load raw files in capture order. Order is never shuffled. Any non-benign label is an attack.
-2. Drop incomplete or non-finite rows and exact duplicates; take every 47th row of the ordered stream (order-preserving, deterministic).
-3. Split chronologically 60 / 20 / 20 inside each CICIDS2017 daily file, and over the whole `Stime`-sorted UNSW-NB15 stream, with a 20-row embargo between splits.
-4. Fit feature selection and scaling on **training data only**. Choose the threshold on **validation data only**. Evaluate **once** on the held-out test partition.
+| Dataset | Configuration | Recall | F1-Score | ROC-AUC | PR-AUC |
+| :-- | :-- | --: | --: | --: | --: |
+| CICIDS2017 | RF Only | 0.9853 | 0.9570 | 0.9979 | 0.9917 |
+| | RF + Difference | 0.9828 | 0.9604 | 0.9981 | 0.9935 |
+| | RF + SSSM | 0.9808 | 0.9613 | 0.9983 | 0.9940 |
+| | RF + Difference + SSSM (full) | 0.9828 | 0.9607 | 0.9981 | 0.9935 |
+| UNSW-NB15 | RF Only | 0.9764 | 0.9409 | 0.9997 | 0.9809 |
+| | RF + Difference | 0.9764 | 0.9388 | 0.9996 | 0.9817 |
+| | RF + SSSM | 0.9858 | 0.9457 | 0.9997 | 0.9877 |
+| | RF + Difference + SSSM (full) | 0.9906 | 0.9438 | 0.9996 | 0.9826 |
 
 <p align="center">
-  <img src="docs/figures/prevalence_shift.png" alt="Attack prevalence across chronological splits" width="62%"/>
+  <img src="results/ablation_cicids2017.png" alt="CICIDS2017 ablation study" width="48%">
+  <img src="results/ablation_unswnb15.png" alt="UNSW-NB15 ablation study" width="48%">
 </p>
 
-The attack share drops sharply between training and test on CICIDS2017 (21.0% → 5.3%), which shifts the best operating point and is one plausible reason the hybrid under-performs on recall. This was not isolated by a separate experiment.
+Values in this section come from separate script runs and may differ slightly from each other.
 
-## Quick start
+## 6. Repository Structure
 
-Requires **Python 3.10+**.
+```text
+PARD-SSM/
+├── artifacts/                      # exported, independently loadable pipelines
+│   ├── cicids2017/
+│   └── unswnb15/                   #   feature_selector.joblib, scaler.joblib, random_forest.joblib,
+│                                   #   switching_ssm.joblib, threshold.json, feature_schema.json,
+│                                   #   model_config.json, metrics.json, demo_sample.csv
+├── backend/                        # FastAPI inference service
+│   ├── app/main.py
+│   ├── requirements.txt
+│   └── pins.txt                    # library versions the artifacts were trained with
+├── frontend/                       # React + TypeScript + Vite + Tailwind + Recharts
+│   ├── src/                        #   App shell, shared UI, five pages
+│   └── public/                     #   precomputed fallback results, sample CSVs
+├── scripts/
+│   └── export_artifacts.py         # train, evaluate, export and verify one dataset
+├── src/
+│   ├── data_processing/            # loaders_v2.py (order-preserving), legacy loader, feature engineering
+│   ├── pipeline/hybrid.py          # shared training / inference code for the hybrid pipeline
+│   ├── inference/                  # Kalman, EKF, UKF, variational switching SSM
+│   ├── models/                     # linear / nonlinear / switching SSM (original research code)
+│   ├── explainablity/              # SHAP analysis
+│   └── utils/
+├── experiments/                    # baselines, ablations, significance tests (original research)
+├── results/                        # original figures and significance outputs
+├── docs/                           # dataset guide, derivations, screenshots
+├── tests/                          # unit tests and API tests
+├── requirements.txt
+├── LICENSE
+└── README.md
+```
 
-**Try it online.** Open the [live Explorer](https://pard-ssm-probabilistic-attack-regim.vercel.app/), run a demo sample or upload a CSV, and inspect the regimes. No installation needed.
+Raw datasets, processed arrays and temporary outputs are excluded from Git. The exported artifacts are committed so the API runs without retraining.
 
-**Reproduce the chronological results and run the API.** The reproduction pipeline, exported models and backend are in the team repository:
+## 7. Installation and Usage
+
+Requires **Python 3.10+** (the artifacts were exported with the versions in `backend/pins.txt`) and **Node.js 18+** for the frontend.
 
 ```bash
 git clone https://github.com/PeerAhammad/PARD-SSM-Probabilistic-Attack-Regime-Detection.git
 cd PARD-SSM-Probabilistic-Attack-Regime-Detection
-python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\Activate.ps1
-pip install -r backend/requirements.txt pytest httpx
-python -m pytest -q
-uvicorn backend.app.main:app --port 8000               # API docs at http://localhost:8000/docs
-```
-
-To retrain from the raw datasets (`python scripts/export_artifacts.py --dataset cicids2017`, then `unswnb15`), follow the instructions in that repository's README.
-
-**Run the original research code in this repository.**
-
-```bash
-git clone https://github.com/Sahilbhekane/PARD-in-Network-Traffic-using-Switching-State-Space-Models-.git
-cd PARD-in-Network-Traffic-using-Switching-State-Space-Models-
-
 python -m venv .venv
-source .venv/bin/activate            # Windows (PowerShell): .venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-
-python -m pytest -q                  # 21 tests: Kalman filter, switching SSM, data processing
+source .venv/bin/activate          # Windows (PowerShell): .venv\Scripts\Activate.ps1
+pip install -r requirements.txt    # full research environment
 ```
 
-No datasets at hand? [`docs/dataset_guide.md`](docs/dataset_guide.md) documents a synthetic three-regime generator for a quick smoke test:
+### 7.1 Run the Explorer locally
+
+See [Quick Start](#quick-start). The frontend reads the API address from `VITE_API_BASE` (default `http://localhost:8000`). To allow other browser origins, set `ALLOWED_ORIGINS` (comma-separated) before starting the backend.
+
+### 7.2 Retrain and export the pipelines
+
+Place the raw datasets under `data/raw/` ([Section 4](#4-datasets-and-experimental-protocol)), then:
 
 ```bash
-python experiments/run_switching.py \
-    --data   data/processed/synthetic_features.npy \
-    --labels data/processed/synthetic_labels.npy \
-    --regimes 3
+python scripts/export_artifacts.py --dataset cicids2017
+python scripts/export_artifacts.py --dataset unswnb15
 ```
 
-<details>
-<summary><b>Original experiments on CICIDS2017 (shuffled-split protocol)</b></summary>
+Each run loads the data, trains the three variants, evaluates on the held-out test partition, writes the artifact folder, writes a demo sample, and **reloads the exported pipeline to verify it reproduces the held-out predictions exactly**. Options: `--raw` (raw data directory), `--stride` (sampling stride, default 47), `--trees` (Random Forest size, default 100), `--out` (output directory, default `artifacts`).
 
-<br/>
-
-Download the data as described in [`docs/dataset_guide.md`](docs/dataset_guide.md), then:
+### 7.3 Original research experiments
 
 ```bash
-python src/data_processing/dataset_loader.py \
-    --dataset cicids2017 --input data/raw/cicids2017/ --output data/processed/
+# Main Switching SSM experiment (original script, random-sample protocol)
+python -m src.models.switching_ssm --data data/processed/cicids2017_features.npy \
+       --labels data/processed/cicids2017_labels.npy --dataset-name CICIDS2017 --no-shap
 
-python experiments/run_baseline.py \
-    --data data/processed/cicids2017_features.npy --labels data/processed/cicids2017_labels.npy
-
-python experiments/run_switching.py \
-    --data data/processed/cicids2017_features.npy --labels data/processed/cicids2017_labels.npy \
-    --regimes 4 --em-iters 20
-
-python experiments/evaluation_metrics.py
+# Baselines, ablations, significance
+python experiments/baselines.py --dataset cicids2017 --lstm-epochs 10
+python experiments/ablation_study.py --dataset cicids2017
+python experiments/statistical_significance.py --help
 ```
 
-These use randomly sampled, shuffled arrays, so their results are **not** chronological detection performance (see the warning in [Results](#results)).
+These scripts need the processed `.npy` arrays described in [`docs/dataset_guide.md`](docs/dataset_guide.md). The same commands work for `unswnb15`.
 
-</details>
-
-## Repository structure
-
-```text
-.
-├── assets/                     # README banner
-├── docs/
-│   ├── Final_Report.pdf        # project report (VTU, 2026-27)
-│   ├── dataset_guide.md        # dataset download and preparation
-│   ├── math_derivations.md     # KF, RTS, GPB2, Viterbi derivations
-│   ├── regime_detection.gif    # illustrative animation
-│   └── figures/                # result charts and Explorer screenshots
-├── experiments/                # baseline, switching-SSM and aggregation scripts
-├── results/                    # figures from the original experiments
-├── src/
-│   ├── data_processing/        # dataset loader, feature engineering
-│   ├── inference/              # Kalman, EKF, UKF, switching Kalman filter (GPB2, Viterbi, EM)
-│   ├── models/                 # linear / nonlinear / switching SSM
-│   ├── explainablity/          # optional SHAP analysis (directory name kept for import compatibility)
-│   └── utils/                  # metrics and visualisation helpers
-├── tests/                      # Kalman filter, switching SSM, data processing
-├── requirements.txt
-└── LICENSE
-```
-
-The reproduction pipeline (`src/pipeline`), exported models (`artifacts/`), inference API (`backend/`) and the Explorer front end (`frontend/`) are in the [team repository](https://github.com/PeerAhammad/PARD-SSM-Probabilistic-Attack-Regime-Detection).
-
-## Testing
+### 7.4 Tests
 
 ```bash
-python -m pytest -q
+python -m pytest -q                  # all tests
+python -m pytest tests/test_api.py -q  # API: startup, inference on both datasets, validation, error handling
 ```
 
-The suite covers the Kalman filter, the switching SSM and data processing.
+## 8. Deployment
 
-## Limitations
+The public deployment uses two independent services:
 
-- **Data preparation.** Both datasets are de-duplicated and sampled (every 47th row), so rare classes such as Heartbleed and Infiltration are largely or entirely absent and the stream is coarser than real traffic.
-- **Single seed, single split.** The split is within-session chronological. It does not test generalisation to unseen days or attack families.
-- **Ordering proxy.** CICIDS2017 has no timestamp column, so file order stands in for capture order.
-- **Small test partitions.** About 560 attack rows on CICIDS2017; UNSW-NB15 has roughly 2% attacks in training against about 6% in test, so its threshold and precision are less reliable.
-- **Hand-set model.** The Kalman bank and transition matrix are not learned, and the regimes are not validated attack families.
-- **No demonstrated SSSM benefit** over a Random Forest alone in the held-out evaluation.
-- **Lead time not claimed.** The earlier lead-time figures came from shuffled data and do not reflect temporal detection.
-- **Deployment.** An attack probability is a model output, not a verified classification. The models are trained on 2015 and 2017 benchmark data.
-
-## Roadmap
-
-- [ ] Learn the switching-SSM parameters from data (e.g. by EM) and test whether learned regimes help
-- [ ] Validate inferred regimes against known attack families; use more than two regimes
-- [ ] Evaluate on unseen days, unseen attack families and a second dataset, with multiple seeds and the significance script
-- [ ] Calibrate the threshold under prevalence shift; improve rare classes such as DoS GoldenEye and Bot
-- [ ] Use real timestamps to measure early detection in seconds
-- [ ] Add stronger sequential baselines (GRU, Transformer) trained to convergence
-- [ ] Add a streaming back end for live traffic
-
-## Team
-
-| Name | USN | Contribution |
+| Component | Host | Key settings |
 | :-- | :-- | :-- |
-| **Prakul Sunil Hiremath** | 2VX23CS013 | Lead: inference engines and core models |
-| **PeerAhammad M. Bagawan** | 2VX23CS029 | Data processing and evaluation pipeline |
-| **Sahil Bhekane** | 2VX23CS042 | Experiments, testing and benchmarking |
-| **Hemanth B. K.** | 2VX23CS012 | Visualisation and documentation |
-| **Dr. Rashmi R. Rachh** | n/a | Project guide |
+| Frontend | Vercel | Root directory `frontend`, Vite preset, build `npm run build`, output `dist`, env `VITE_API_BASE=<backend URL>` |
+| Backend | Render (free instance) | Build `pip install -r backend/requirements.txt`, start `uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT`, health check `/api/health`, env `PYTHON_VERSION` (matching the export environment) and `ALLOWED_ORIGINS=<frontend URL>` |
 
-**Institution:** Visvesvaraya Technological University, Belagavi, Karnataka, India · Department of Computer Science and Engineering · Major Project 2026–27
+Notes:
 
-## Citation
+- The backend loads both model pipelines once at startup. The artifacts are packaged in the repository, so nothing depends on files written at runtime.
+- Free Render instances sleep after inactivity, so the first request can take up to a minute. The frontend waits for the backend, then falls back to the labelled precomputed results if it cannot connect.
+- `ALLOWED_ORIGINS` must exactly match the deployed frontend origin (scheme and host, no trailing slash).
 
-If you use this work, please cite the original preprint:
+## 9. Limitations
+
+- **Original results.** The repository-reported experiments use randomly sampled, shuffled-order data. They cannot be read as chronological detection performance, and their lead-time figures are not temporally valid. The processed arrays could not be regenerated from the raw files with the legacy loader (`src/data_processing/dataset_loader.py`): its CICIDS2017 column names no longer match after header stripping, and it cannot read the headerless UNSW-NB15 files. `loaders_v2.py` replaces it for the Explorer.
+- **New evaluation.** One seed and one split. The split is chronological *within* each capture session, so it does not test generalisation to unseen days or unseen attack families. CICIDS2017 has no timestamp column, so file order is only a proxy for capture order.
+- **Sampling.** Data were de-duplicated and sampled 1 in 47 to about 54,000 (CICIDS2017) and 43,000 (UNSW-NB15) rows. Rare classes such as Heartbleed and Infiltration are largely or entirely absent, and the sampled stream is coarser than real traffic.
+- **Small test sets.** The CICIDS2017 test partition holds about 560 attack rows. UNSW-NB15's attack share is 2.0% in training versus 6.2% in test, and its attack share falls sharply after de-duplication, so its threshold and precision are less reliable. UNSW-NB15 uses 38 features computed from the raw files, not the 36 of the legacy arrays.
+- **Model.** The Kalman parameters and transition matrix are hand-set. Regimes are neutral filter states, not validated attack families. The SSSM features do not improve on a Random Forest alone.
+- **Explorer.** Models accept only data with the exact feature schema they were trained on. Each request is processed as one independent sequence (at most 5,000 rows) with a fresh filter state. Free-tier hosting means cold starts and no availability guarantee.
+- **Deployment.** These are research models trained on 2015 and 2017 benchmark datasets. Strong benchmark results do not establish production readiness; independent chronological captures and live traffic are still needed. Detection lead time, where mentioned, is in sequence steps, not seconds.
+
+## 10. Citation and Attribution
+
+This repository is derived from and builds on the original PARD-SSM research.
+
+- **Preprint:** [arXiv:2604.02299](https://arxiv.org/abs/2604.02299)
+- **Original project DOI:** [10.5281/zenodo.19697928](https://doi.org/10.5281/zenodo.19697928)
+
+The original research and its authors retain their attribution. The experiment scripts, order-preserving data pipeline, held-out evaluation, exported artifacts, inference service and web application in this repository are separate reproduction and extension work.
+
+If you use this work, please cite the original paper and this repository:
 
 ```bibtex
-@article{hiremath2026pard,
-  title   = {PARD-SSM: Probabilistic Cyber-Attack Regime Detection via Variational Switching State-Space Models},
-  author  = {Hiremath, Prakul Sunil and Bagawan, PeerAhammad M and Bhekane, Sahil},
-  journal = {arXiv preprint arXiv:2604.02299},
-  year    = {2026}
+@misc{pardssm2026,
+  title         = {PARD-SSM: Probabilistic Cyber-Attack Regime Detection via Variational Switching State-Space Models},
+  year          = {2026},
+  eprint        = {2604.02299},
+  archivePrefix = {arXiv},
+  url           = {https://arxiv.org/abs/2604.02299},
+  note          = {Author list as given on the arXiv page}
+}
+
+@misc{pardssm_explorer,
+  title        = {PARD-SSM: Reproduction, Evaluation and Interactive Explorer},
+  year         = {2026},
+  howpublished = {\url{https://github.com/PeerAhammad/PARD-SSM-Probabilistic-Attack-Regime-Detection}},
+  note         = {Independent reproduction and web platform; live demo at https://pard-ssm-probabilistic-attack-regim.vercel.app/}
 }
 ```
 
-## Acknowledgements and attribution
+Datasets: **CICIDS2017** (Canadian Institute for Cybersecurity, University of New Brunswick) and **UNSW-NB15** (UNSW Canberra Cyber). Please follow their respective terms and cite them when using the data.
 
-- Datasets: [CICIDS2017](https://www.unb.ca/cic/datasets/ids-2017.html) (Canadian Institute for Cybersecurity) and [UNSW-NB15](https://research.unsw.edu.au/projects/unswnb15-dataset) (UNSW Canberra Cyber).
-- The reproduction pipeline, exported artifacts, inference API and web application were developed in the team repository [PeerAhammad/PARD-SSM-Probabilistic-Attack-Regime-Detection](https://github.com/PeerAhammad/PARD-SSM-Probabilistic-Attack-Regime-Detection).
-- Methodological references: Murphy (1998) *Switching Kalman Filters*; Shumway and Stoffer (1991) *Dynamic linear models with switching*; Breiman (2001) *Random forests*; Sommer and Paxson (2010) *Outside the closed world*, whose caution about evaluation methodology motivates the chronological protocol. The full reference list is in the [final report](docs/Final_Report.pdf).
+## 11. License
 
-## License
+Released under the original **Apache License 2.0**. See [`LICENSE`](LICENSE) for the full terms, and preserve the license and attribution notices when redistributing this derivative work.
 
-Released under the **Apache License 2.0**. See [`LICENSE`](LICENSE).
+---
 
 <div align="center">
-<sub>VTU Major Project 2026–27 · Research demonstration, not a production security tool</sub>
+
+*Independent reproduction, chronological evaluation and interactive exploration of probabilistic attack-regime detection.*
+
 </div>
