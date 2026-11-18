@@ -1,0 +1,46 @@
+cff-version: 1.2.0
+message: "If you use this repository, please cite it together with the original PARD-SSM preprint."
+title: "PARD in Network Traffic using Switching State Space Models"
+type: software
+version: 1.0.0
+date-released: "2026-11-15"
+license: Apache-2.0
+repository-code: "https://github.com/Sahilbhekane/PARD-in-Network-Traffic-using-Switching-State-Space-Models-"
+url: "https://pard-ssm-probabilistic-attack-regim.vercel.app/"
+abstract: >-
+  A time-ordered, leakage-free reproduction and re-evaluation of PARD-SSM, a hybrid
+  switching state-space model and Random Forest approach to network intrusion
+  detection, evaluated on CICIDS2017 and UNSW-NB15. Includes ablation, class-wise
+  analysis, exported pipelines, an inference API and a public web application.
+keywords:
+  - intrusion detection
+  - switching state-space models
+  - Kalman filter
+  - network security
+  - CICIDS2017
+  - UNSW-NB15
+authors:
+  - family-names: Hiremath
+    given-names: Prakul Sunil
+  - family-names: Bagawan
+    given-names: PeerAhammad M.
+  - family-names: Bhekane
+    given-names: Sahil
+  - family-names: "B. K."
+    given-names: Hemanth
+  - family-names: Rachh
+    given-names: Rashmi R.
+    alias: "Project guide"
+references:
+  - type: article
+    title: "PARD-SSM: Probabilistic Cyber-Attack Regime Detection via Variational Switching State-Space Models"
+    authors:
+      - family-names: Hiremath
+        given-names: Prakul Sunil
+      - family-names: Bagawan
+        given-names: PeerAhammad M.
+      - family-names: Bhekane
+        given-names: Sahil
+    journal: "arXiv preprint arXiv:2604.02299"
+    year: 2026
+    url: "https://arxiv.org/abs/2604.02299"

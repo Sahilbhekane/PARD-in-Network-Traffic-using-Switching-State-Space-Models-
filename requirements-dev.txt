@@ -1,0 +1,6 @@
+# Lightweight environment: inference API, tests and figure generation.
+# Library versions are pinned to those the exported artifacts were trained with.
+-r backend/requirements.txt
+pytest>=7.4
+httpx>=0.27
+matplotlib>=3.7
