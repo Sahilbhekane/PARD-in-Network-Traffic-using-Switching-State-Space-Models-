@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300" role="img" aria-labelledby="t d">
+  <title id="t">PARD-SSM</title>
+  <desc id="d">Probabilistic Attack Regime Detection in Network Traffic using Switching State-Space Models</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0B1220"/>
+      <stop offset="0.55" stop-color="#1E1B4B"/>
+      <stop offset="1" stop-color="#312E81"/>
+    </linearGradient>
+    <linearGradient id="line" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#2DD4BF"/>
+      <stop offset="1" stop-color="#A5B4FC"/>
+    </linearGradient>
+    <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+      <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#FFFFFF" stroke-opacity="0.045" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="300" rx="18" fill="url(#bg)"/>
+  <rect width="1200" height="300" rx="18" fill="url(#grid)"/>
+
+  <text x="56" y="108" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="68" font-weight="800" fill="#FFFFFF" letter-spacing="1">PARD-SSM</text>
+  <text x="58" y="150" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="23" font-weight="600" fill="#C7D2FE">Probabilistic Attack Regime Detection</text>
+  <text x="58" y="180" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="23" font-weight="600" fill="#C7D2FE">in Network Traffic</text>
+  <text x="58" y="224" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" fill="#94A3B8">Switching state-space models  ·  Kalman-filter bank  ·  Random Forest</text>
+  <text x="58" y="246" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" fill="#94A3B8">Chronological, leakage-free evaluation on CICIDS2017 and UNSW-NB15</text>
+
+  <text x="640" y="62" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#94A3B8" letter-spacing="1.5">OBSERVED TRAFFIC FEATURE</text>
+  <line x1="640" y1="150" x2="1160" y2="150" stroke="#FFFFFF" stroke-opacity="0.12" stroke-dasharray="4 6"/>
+  <polyline points="640.0,148.9 645.0,148.6 650.1,152.1 655.1,149.1 660.2,152.2 665.2,151.2 670.3,149.2 675.3,151.5 680.4,148.1 685.4,149.9 690.5,147.0 695.5,146.5 700.6,148.0 705.6,150.1 710.7,145.7 715.7,146.4 720.8,149.1 725.8,151.5 730.9,149.9 735.9,149.5 741.0,153.6 746.0,148.6 751.1,153.9 756.1,150.7 761.2,149.8 766.2,149.5 771.3,150.2 776.3,152.7 781.4,148.3 786.4,150.0 791.5,149.7 796.5,147.7 801.6,148.4 806.6,145.4 811.7,145.5 816.7,146.7 821.7,150.0 826.8,144.4 831.8,141.1 836.9,157.8 841.9,153.1 847.0,146.7 852.0,173.2 857.1,168.2 862.1,143.6 867.2,159.1 872.2,154.2 877.3,169.8 882.3,159.6 887.4,134.3 892.4,168.4 897.5,122.4 902.5,137.8 907.6,156.0 912.6,125.9 917.7,145.5 922.7,124.6 927.8,159.9 932.8,167.5 937.9,159.6 942.9,176.8 948.0,148.3 953.0,167.9 958.1,161.6 963.1,151.7 968.2,150.4 973.2,152.0 978.3,152.0 983.3,148.6 988.3,149.3 993.4,145.4 998.4,149.2 1003.5,149.1 1008.5,151.5 1013.6,151.0 1018.6,148.4 1023.7,149.7 1028.7,152.0 1033.8,148.7 1038.8,151.6 1043.9,150.0 1048.9,149.6 1054.0,149.0 1059.0,168.5 1064.1,132.9 1069.1,136.4 1074.2,141.3 1079.2,164.0 1084.3,121.2 1089.3,139.5 1094.4,144.7 1099.4,162.9 1104.5,161.2 1109.5,165.7 1114.6,137.8 1119.6,147.6 1124.7,147.1 1129.7,176.3 1134.8,181.4 1139.8,139.8 1144.9,140.7 1149.9,142.3 1155.0,140.4 1160.0,151.0" fill="none" stroke="url(#line)" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+  <text x="640" y="204" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#94A3B8" letter-spacing="1.5">INFERRED REGIME</text>
+  <rect x="640.0" y="212" width="186.8" height="14" rx="4" fill="#2DD4BF" opacity="0.9"/><rect x="826.8" y="212" width="136.3" height="14" rx="4" fill="#F43F5E" opacity="0.9"/><rect x="963.1" y="212" width="95.9" height="14" rx="4" fill="#2DD4BF" opacity="0.9"/><rect x="1059.0" y="212" width="101.0" height="14" rx="4" fill="#F43F5E" opacity="0.9"/>
+  <g font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#CBD5E1">
+    <rect x="640" y="246" width="10" height="10" rx="2" fill="#2DD4BF"/><text x="656" y="256">Regime 1: low-noise, near-stationary</text>
+    <rect x="875" y="246" width="10" height="10" rx="2" fill="#F43F5E"/><text x="891" y="256">Regime 2: high-gain, high-noise</text>
+  </g>
+</svg>
